@@ -2,3 +2,7 @@
 .eslintrc*
 .DS_Store
 __pycache__
+
+*.pkl
+*.h5
+*.zip

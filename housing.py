@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # Load model with absolute path
-model_path = os.path.join(os.path.dirname(__file__), 'model', 'housing_price.pkl')
+model_path = os.path.join(os.getcwd(), 'model', 'housing_price.pkl')
 model = joblib.load(model_path)
 
 # Connect to MongoDB with error handling
@@ -28,21 +28,19 @@ def predict():
         zipcode = request.form['Zipcode']
         sqft_lot = float(request.form['Sqft'])
         price = float(request.form['Budget'])
+        print(f"Input received: zipcode={zipcode}, sqft_lot={sqft_lot}, price={price}")
     except (ValueError, KeyError) as e:
+        print(f"Input error: {e}")
         return render_template('Main.html', prediction="Invalid input. Please check your entries.")
 
     # Match input names with model training data
-    input_data = {
-        'zipcode': zipcode,
-        'sqft_lot': sqft_lot,
-        'price': price
-    }
-
-    input_df = pd.DataFrame([input_data])
+    input_data = np.array([[zipcode, sqft_lot, price]])  # Convert to NumPy array
 
     try:
-        predicted_price = model.predict(input_df)[0]
+        predicted_price = model.predict(input_data)[0]  # Model should now accept this
+        print(f"Predicted price: {predicted_price}")
     except Exception as e:
+        print(f"Model error: {e}")
         return render_template('Main.html', prediction="Model error. Please try again later.")
 
     recommendation = (
@@ -51,13 +49,14 @@ def predict():
         else f"The predicted price is higher than your budget."
     )
 
-    # Save to MongoDB (ensure consistency with field names)
+    # Save to MongoDB (ignore extra fields)
     record = {
-        'input_data': input_data,
-        'predicted_price': predicted_price,
-        'recommendation': recommendation
+        'zipcode': zipcode,
+        'sqft_lot': sqft_lot,
+        'price': predicted_price
     }
     collection.insert_one(record)
+    print("Data saved to MongoDB")
 
     return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
 

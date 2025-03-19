@@ -1,0 +1,29 @@
+<section id="input">
+    <h2>Predict Housing Price</h2>
+    <form action="/predict" method="POST">
+        <label for="State">State:</label>
+        <input type="text" id="State" name="State" required>
+
+        <label for="Bedrooms">Number of Bedrooms:</label>
+        <input type="number" id="Bedrooms" name="Bedrooms" required>
+
+        <label for="Bathrooms">Number of Bathrooms:</label>
+        <input type="number" id="Bathrooms" name="Bathrooms" required>
+
+        <label for="Sqft">Square Footage:</label>
+        <input type="number" id="Sqft" name="Sqft" required>
+
+        <label for="Budget">Budget:</label>
+        <input type="number" id="Budget" name="Budget" required>
+
+        <button type="submit">Predict</button>
+    </form>
+</section>
+
+<section id="results">
+    <h2>Prediction Results</h2>
+    {% if prediction %}
+        <p>Predicted Price: <strong>{{ prediction }}</strong></p>
+        <p>Recommendation: {{ recommendation }}</p>
+    {% endif %}
+</section>

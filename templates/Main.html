@@ -175,7 +175,6 @@
             <li><a href="#input">Predict</a></li>
             <li><a href="/history">History</a></li>
             <li><a href="#chart-section">Market Trends</a></li>
-            <li><a href="#contact">Contact</a></li>
         </ul>
         <button class="nav-toggle" onclick="toggleNav()">☰</button>
     </div>
@@ -185,16 +184,10 @@
 <section id="input">
     <h2>Predict Housing Price</h2>
     <form action="/predict" method="POST">
-        <label for="State">State:</label>
-        <input type="text" id="State" name="State" required>
+        <label for="Zipcode">Zipcode:</label>
+        <input type="text" id="Zipcode" name="Zipcode" required>
 
-        <label for="Bedrooms">Number of Bedrooms:</label>
-        <input type="number" id="Bedrooms" name="Bedrooms" required>
-
-        <label for="Bathrooms">Number of Bathrooms:</label>
-        <input type="number" id="Bathrooms" name="Bathrooms" required>
-
-        <label for="Sqft">Square Footage:</label>
+        <label for="Sqft">Square Footage (Lot):</label>
         <input type="number" id="Sqft" name="Sqft" required>
 
         <label for="Budget">Budget:</label>
@@ -225,22 +218,22 @@
         fetch('/data')
             .then(response => response.json())
             .then(data => {
-                var states = data.map(row => row.state);
+                var zipcodes = data.map(row => row.zipcode);
                 var prices = data.map(row => row.price);
-                var sqft = data.map(row => row.sqft);
+                var sqft_lot = data.map(row => row.sqft_lot);
                 
                 var trace = {
-                    x: sqft,
+                    x: sqft_lot,
                     y: prices,
                     mode: 'markers',
                     type: 'scatter',
-                    text: states,
+                    text: zipcodes,
                     marker: { size: 12, color: '#663399' }
                 };
 
                 var layout = {
                     title: 'Real-Time Housing Market Trends',
-                    xaxis: { title: 'Square Footage' },
+                    xaxis: { title: 'Square Footage (Lot)' },
                     yaxis: { title: 'Predicted Price ($)' }
                 };
 

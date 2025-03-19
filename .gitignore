@@ -3,6 +3,6 @@
 .DS_Store
 __pycache__
 
-*.pkl
+#*.pkl
 *.h5
 *.zip

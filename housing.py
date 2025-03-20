@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # Load model with absolute path
-model_path = os.path.join(os.getcwd(), 'model', 'predict_pricing.pkl')
+model_path = os.path.join(os.getcwd(), 'Anh', 'housing_price.pkl')
 model = joblib.load(model_path)
 
 # Connect to MongoDB with error handling

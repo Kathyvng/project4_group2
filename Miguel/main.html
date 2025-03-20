@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My home</title>
+</head>
+<body>
+    <header>
+        <h1>Finding My Home </h1>
+    </header>
+
+    <section class="questions">
+       
+            <questions>
+                <form action="/predict" method="post">
+                    <label for="zipoce">Enter zipcode</label>
+                    <input type="number" id="zipcode" name="zipcode"><br><br>
+    
+                    <label for="sqft_lot">sqft_lot </label>
+                    <input type="number" name="sqft_lot" id="sqft_lot"><br><br>
+    
+                    <label for="price">price</label>
+                    <input type="number" name="price" id="price"><br><br>
+    
+                    <button type="submit">Predict</button><br><br>                
+                </form>
+            </questions>
+            
+    </section>
+    {% if prediction %}
+    <section class="results">
+        
+        <div class="resultinfo">
+            <h1>Your home options</h1>
+            <h2>{{ prediction }}</h2>
+        </div>
+    </section>
+
+    
+</body>
+</html>

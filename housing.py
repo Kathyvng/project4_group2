@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # Load model with absolute path
-model_path = os.path.join(os.getcwd(), 'model', 'housing_price.pkl')
+model_path = os.path.join(os.getcwd(), 'model', 'predict_pricing.pkl')
 model = joblib.load(model_path)
 
 # Connect to MongoDB with error handling
@@ -25,40 +25,42 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        zipcode = request.form['Zipcode']
+        zipcode = int(request.form['Zipcode'])
         sqft_lot = float(request.form['Sqft'])
         price = float(request.form['Budget'])
-        print(f"Input received: zipcode={zipcode}, sqft_lot={sqft_lot}, price={price}")
-    except (ValueError, KeyError) as e:
-        print(f"Input error: {e}")
-        return render_template('Main.html', prediction="Invalid input. Please check your entries.")
 
-    # Match input names with model training data
-    input_data = np.array([[zipcode, sqft_lot, price]])  # Convert to NumPy array
+        input_data = pd.DataFrame([{
+            'zipcode': zipcode,
+            'sqft_lot': sqft_lot,
+            'price': price
+        }])
 
-    try:
-        predicted_price = model.predict(input_data)[0]  # Model should now accept this
-        print(f"Predicted price: {predicted_price}")
+        # Make prediction
+        predicted_price = model.predict(input_data)[0]
+
+        # Convert numpy types to Python native types
+        predicted_price = float(predicted_price)
+
+        recommendation = (
+            f"This is a good deal in {zipcode}!"
+            if predicted_price <= price
+            else f"The predicted price is higher than your budget."
+        )
+
+        # Save to MongoDB (convert numpy types to native Python types)
+        record = {
+            'zipcode': int(zipcode),  # Ensure it's a Python int
+            'sqft_lot': float(sqft_lot),  # Ensure it's a Python float
+            'price': float(predicted_price)  # Ensure it's a Python float
+        }
+        collection.insert_one(record)
+
+        return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
+
     except Exception as e:
-        print(f"Model error: {e}")
+        print(f"Error: {e}")
         return render_template('Main.html', prediction="Model error. Please try again later.")
 
-    recommendation = (
-        f"This is a good deal in {zipcode}!"
-        if predicted_price <= price
-        else f"The predicted price is higher than your budget."
-    )
-
-    # Save to MongoDB (ignore extra fields)
-    record = {
-        'zipcode': zipcode,
-        'sqft_lot': sqft_lot,
-        'price': predicted_price
-    }
-    collection.insert_one(record)
-    print("Data saved to MongoDB")
-
-    return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
 
 # Route to provide real-time data
 @app.route('/data')
@@ -67,16 +69,16 @@ def data():
         records = collection.find().sort('_id', -1).skip(0).limit(20)
         data = [
             {
-                'zipcode': record['input_data']['zipcode'],
-                'sqft_lot': record['input_data']['sqft_lot'],
-                'price': record['predicted_price']
+                'zipcode': int(record.get('zipcode')) if record.get('zipcode') else None,
+                'sqft_lot': float(record.get('sqft_lot')) if record.get('sqft_lot') else None,
+                'price': float(record.get('price')) if record.get('price') else None
             }
             for record in records
         ]
         return jsonify(data)
     except Exception as e:
+        print(f"Error fetching data: {e}")
         return jsonify({'error': f"Failed to load data: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(debug=True)
-

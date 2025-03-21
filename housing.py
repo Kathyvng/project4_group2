@@ -26,7 +26,7 @@ def home():
 def predict():
     try:
         zipcode = int(request.form['Zipcode'])
-        sqft_lot = float(request.form['Sqft'])
+        sqft_living = float(request.form['Sqft'])
         budget = float(request.form['Budget'])
 
         # Load additional data for avg_income from MongoDB
@@ -35,7 +35,7 @@ def predict():
 
         input_data = pd.DataFrame([{
             'zipcode': zipcode,
-            'sqft_living': sqft_lot,
+            'sqft_living': sqft_living,
             'price': budget,
             'avg_income': avg_income
         }])
@@ -53,7 +53,7 @@ def predict():
         # Save to MongoDB
         record = {
             'zipcode': int(zipcode),
-            'sqft_lot': float(sqft_lot),
+            'sqft_living': float(sqft_living),
             'price': float(predicted_price),
             'avg_income': float(avg_income)  # Ensure it's a float
         }
@@ -75,7 +75,7 @@ def data():
         data = [
             {
                 'zipcode': int(record.get('zipcode')) if record.get('zipcode') else None,
-                'sqft_lot': float(record.get('sqft_lot')) if record.get('sqft_lot') else None,
+                'sqft_living': float(record.get('sqft_living')) if record.get('sqft_living') else None,
                 'price': float(record.get('price')) if record.get('price') else None,
                 'avg_income': float(record.get('avg_income')) if record.get('avg_income') else None, # Added avg_income
                 'crime_rate_per_capita': float(record.get('crime_rate_per_capita')) if record.get('crime_rate_per_capita') else None

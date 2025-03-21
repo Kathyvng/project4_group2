@@ -29,20 +29,23 @@ def predict():
     try:
         global df  # Move global statement to the top
 
-        zipcode = int(request.form['Zipcode'])
-        sqft_living = float(request.form['Sqft'])
+        # Get user inputs from form
+        zipcode = str(request.form['Zipcode'])  # Zipcode should be a string
+        sqft_living = int(request.form['Sqft'])  # sqft_living should be an integer
         budget = float(request.form['Budget'])
 
-        # Load additional data for avg_income, bedrooms, and bathrooms from JSON data
+        # Load additional data for avg_income, bedrooms, bathrooms, and city from JSON data
         record = df.loc[df['zipcode'] == zipcode].head(1)
         if not record.empty:
             avg_income = float(record['avg_income'].values[0])
-            bedrooms = float(record['bedrooms'].values[0]) if 'bedrooms' in record.columns else 0
+            bedrooms = int(record['bedrooms'].values[0]) if 'bedrooms' in record.columns else 0
             bathrooms = float(record['bathrooms'].values[0]) if 'bathrooms' in record.columns else 0
+            city = str(record['city'].values[0]) if 'city' in record.columns else 'Unknown'
         else:
             avg_income = 0
             bedrooms = 0
             bathrooms = 0
+            city = 'Unknown'
 
         # Create input_data with the required fields only
         input_data = pd.DataFrame([{
@@ -50,13 +53,17 @@ def predict():
             'sqft_living': sqft_living,
             'avg_income': avg_income,
             'bedrooms': bedrooms,
-            'bathrooms': bathrooms
+            'bathrooms': bathrooms,
+            'city': city
         }])
+
+        print(f"Input Data: {input_data}")
 
         # Make prediction
         predicted_price = model.predict(input_data)[0]
         predicted_price = float(predicted_price)  # Ensure it's a Python float
 
+        # Generate recommendation based on budget
         recommendation = (
             f"This is a good deal in {zipcode}!"
             if predicted_price <= budget
@@ -70,18 +77,14 @@ def predict():
             'predicted_price': predicted_price,
             'avg_income': avg_income,
             'bedrooms': bedrooms,
-            'bathrooms': bathrooms
+            'bathrooms': bathrooms,
+            'city': city
         }
 
         # Add new data to df
         df = pd.concat([df, pd.DataFrame([new_record])], ignore_index=True)
 
         return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return render_template('Main.html', prediction="Model error. Please try again later.")
-
 
     except Exception as e:
         print(f"Error: {e}")

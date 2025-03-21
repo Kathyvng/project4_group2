@@ -190,6 +190,15 @@
         <label for="Sqft">Square Footage (Living Area):</label>
         <input type="number" id="Sqft" name="Sqft" required>
 
+        <label for="Bedrooms">Bedrooms:</label>
+        <input type="number" id="Bedrooms" name="Bedrooms" required>
+
+        <label for="Bathrooms">Bathrooms:</label>
+        <input type="number" step="0.1" id="Bathrooms" name="Bathrooms" required>
+
+        <label for="City">City:</label>
+        <input type="text" id="City" name="City" required>
+
         <label for="Budget">Budget ($):</label>
         <input type="number" id="Budget" name="Budget" required>
 
@@ -220,17 +229,18 @@
             .then(data => {
                 var zipcodes = data.map(row => row.zipcode);
                 var predicted_prices = data.map(row => row.predicted_price);
-                var avg_income = data.map(row => row.avg_income || 0); // Default to 0 if missing
+                var avg_income = data.map(row => row.avg_income || 0);
+                var cities = data.map(row => row.city || 'Unknown');
 
                 var trace = {
-                    x: avg_income, // X-axis as avg_income
-                    y: predicted_prices, // Y-axis as predicted_price
+                    x: avg_income,
+                    y: predicted_prices,
                     mode: 'markers',
                     type: 'scatter',
-                    text: zipcodes,
+                    text: cities.map((city, i) => `${city}, Zipcode: ${zipcodes[i]}`),
                     marker: {
                         size: 12,
-                        color: avg_income, // Optional: color by avg_income
+                        color: avg_income,
                         colorscale: 'Viridis',
                         showscale: true
                     }
@@ -246,10 +256,7 @@
             });
     }
 
-    // Refresh chart every 3 seconds
     setInterval(updateChart, 3000);
-
-    // Load chart on page load
     updateChart();
 
     function toggleNav() {

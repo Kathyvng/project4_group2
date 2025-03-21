@@ -220,20 +220,26 @@
             .then(data => {
                 var zipcodes = data.map(row => row.zipcode);
                 var prices = data.map(row => row.price);
-                var sqft_lot = data.map(row => row.sqft_lot);
-                
+                var avg_income = data.map(row => row.avg_income);
+                var crime_rate = data.map(row => row.crime_rate_per_capita);
+
                 var trace = {
-                    x: sqft_lot,
-                    y: prices,
+                    x: avg_income, // X-axis as avg_income
+                    y: prices, // Y-axis as price
                     mode: 'markers',
                     type: 'scatter',
                     text: zipcodes,
-                    marker: { size: 12, color: '#663399' }
+                    marker: {
+                        size: 12,
+                        color: crime_rate, // Optional: color by crime rate
+                        colorscale: 'Viridis',
+                        showscale: true
+                    }
                 };
 
                 var layout = {
-                    title: 'Real-Time Housing Market Trends',
-                    xaxis: { title: 'Square Footage (Lot)' },
+                    title: 'Real-Time Housing Market Trends: Income vs Price',
+                    xaxis: { title: 'Average Income ($)' },
                     yaxis: { title: 'Predicted Price ($)' }
                 };
 

@@ -27,6 +27,8 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        global df  # Move global statement to the top
+
         zipcode = int(request.form['Zipcode'])
         sqft_living = float(request.form['Sqft'])
         budget = float(request.form['Budget'])
@@ -70,10 +72,16 @@ def predict():
             'bedrooms': bedrooms,
             'bathrooms': bathrooms
         }
-        global df
+
+        # Add new data to df
         df = pd.concat([df, pd.DataFrame([new_record])], ignore_index=True)
 
         return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return render_template('Main.html', prediction="Model error. Please try again later.")
+
 
     except Exception as e:
         print(f"Error: {e}")

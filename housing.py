@@ -27,31 +27,35 @@ def predict():
     try:
         zipcode = int(request.form['Zipcode'])
         sqft_lot = float(request.form['Sqft'])
-        price = float(request.form['Budget'])
+        budget = float(request.form['Budget'])
+
+        # Load additional data for avg_income from MongoDB
+        record = collection.find_one({'zipcode': zipcode})
+        avg_income = float(record.get('avg_income')) if record else 0
 
         input_data = pd.DataFrame([{
             'zipcode': zipcode,
-            'sqft_lot': sqft_lot,
-            'price': price
+            'sqft_living': sqft_lot,
+            'price': budget,
+            'avg_income': avg_income
         }])
 
         # Make prediction
         predicted_price = model.predict(input_data)[0]
-
-        # Convert numpy types to Python native types
-        predicted_price = float(predicted_price)
+        predicted_price = float(predicted_price)  # Ensure it's a Python float
 
         recommendation = (
             f"This is a good deal in {zipcode}!"
-            if predicted_price <= price
+            if predicted_price <= budget
             else f"The predicted price is higher than your budget."
         )
 
-        # Save to MongoDB (convert numpy types to native Python types)
+        # Save to MongoDB
         record = {
-            'zipcode': int(zipcode),  # Ensure it's a Python int
-            'sqft_lot': float(sqft_lot),  # Ensure it's a Python float
-            'price': float(predicted_price)  # Ensure it's a Python float
+            'zipcode': int(zipcode),
+            'sqft_lot': float(sqft_lot),
+            'price': float(predicted_price),
+            'avg_income': float(avg_income)  # Ensure it's a float
         }
         collection.insert_one(record)
 
@@ -66,12 +70,15 @@ def predict():
 @app.route('/data')
 def data():
     try:
-        records = collection.find().sort('_id', -1).skip(0).limit(20)
+        # Pull the latest 20 records from MongoDB
+        records = collection.find().sort('_id', -1).limit(20)
         data = [
             {
                 'zipcode': int(record.get('zipcode')) if record.get('zipcode') else None,
                 'sqft_lot': float(record.get('sqft_lot')) if record.get('sqft_lot') else None,
-                'price': float(record.get('price')) if record.get('price') else None
+                'price': float(record.get('price')) if record.get('price') else None,
+                'avg_income': float(record.get('avg_income')) if record.get('avg_income') else None, # Added avg_income
+                'crime_rate_per_capita': float(record.get('crime_rate_per_capita')) if record.get('crime_rate_per_capita') else None
             }
             for record in records
         ]
@@ -79,6 +86,7 @@ def data():
     except Exception as e:
         print(f"Error fetching data: {e}")
         return jsonify({'error': f"Failed to load data: {str(e)}"})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

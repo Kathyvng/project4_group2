@@ -187,10 +187,10 @@
         <label for="Zipcode">Zipcode:</label>
         <input type="text" id="Zipcode" name="Zipcode" required>
 
-        <label for="Sqft">Square Footage:</label>
+        <label for="Sqft">Square Footage (Living Area):</label>
         <input type="number" id="Sqft" name="Sqft" required>
 
-        <label for="Budget">Budget:</label>
+        <label for="Budget">Budget ($):</label>
         <input type="number" id="Budget" name="Budget" required>
 
         <button type="submit">Predict</button>
@@ -219,26 +219,25 @@
             .then(response => response.json())
             .then(data => {
                 var zipcodes = data.map(row => row.zipcode);
-                var prices = data.map(row => row.price);
-                var avg_income = data.map(row => row.avg_income);
-                var crime_rate = data.map(row => row.crime_rate_per_capita);
+                var predicted_prices = data.map(row => row.predicted_price);
+                var avg_income = data.map(row => row.avg_income || 0); // Default to 0 if missing
 
                 var trace = {
                     x: avg_income, // X-axis as avg_income
-                    y: prices, // Y-axis as price
+                    y: predicted_prices, // Y-axis as predicted_price
                     mode: 'markers',
                     type: 'scatter',
                     text: zipcodes,
                     marker: {
                         size: 12,
-                        color: crime_rate, // Optional: color by crime rate
+                        color: avg_income, // Optional: color by avg_income
                         colorscale: 'Viridis',
                         showscale: true
                     }
                 };
 
                 var layout = {
-                    title: 'Real-Time Housing Market Trends: Income vs Price',
+                    title: 'Real-Time Housing Market Trends: Income vs Predicted Price',
                     xaxis: { title: 'Average Income ($)' },
                     yaxis: { title: 'Predicted Price ($)' }
                 };
@@ -253,7 +252,6 @@
     // Load chart on page load
     updateChart();
 
-    // Toggle Navbar for Mobile
     function toggleNav() {
         const nav = document.querySelector('.nav-links');
         nav.classList.toggle('active');

@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import joblib
-from pymongo import MongoClient
 import os
+import json
 
 app = Flask(__name__)
 
@@ -10,13 +10,15 @@ app = Flask(__name__)
 model_path = os.path.join(os.getcwd(), 'model', 'optimized_predict_pricing.pkl')
 model = joblib.load(model_path)
 
-# Connect to MongoDB with error handling
+# Load data from JSON file
+data_path = os.path.join(os.getcwd(), 'static_data', 'real_estate_db.housing_merge.json')
 try:
-    client = MongoClient('localhost', 27017)
-    db = client['real_estate_db']
-    collection = db['housing_merge']
+    with open(data_path, 'r') as file:
+        data = json.load(file)
+    df = pd.DataFrame(data)
 except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
+    print(f"Error loading JSON file: {e}")
+    df = pd.DataFrame()
 
 @app.route('/')
 def home():
@@ -29,15 +31,24 @@ def predict():
         sqft_living = float(request.form['Sqft'])
         budget = float(request.form['Budget'])
 
-        # Load additional data for avg_income from MongoDB
-        record = collection.find_one({'zipcode': zipcode})
-        avg_income = float(record.get('avg_income')) if record else 0
+        # Load additional data for avg_income, bedrooms, and bathrooms from JSON data
+        record = df.loc[df['zipcode'] == zipcode].head(1)
+        if not record.empty:
+            avg_income = float(record['avg_income'].values[0])
+            bedrooms = float(record['bedrooms'].values[0]) if 'bedrooms' in record.columns else 0
+            bathrooms = float(record['bathrooms'].values[0]) if 'bathrooms' in record.columns else 0
+        else:
+            avg_income = 0
+            bedrooms = 0
+            bathrooms = 0
 
+        # Create input_data with the required fields only
         input_data = pd.DataFrame([{
             'zipcode': zipcode,
             'sqft_living': sqft_living,
-            'price': budget,
-            'avg_income': avg_income
+            'avg_income': avg_income,
+            'bedrooms': bedrooms,
+            'bathrooms': bathrooms
         }])
 
         # Make prediction
@@ -50,14 +61,17 @@ def predict():
             else f"The predicted price is higher than your budget."
         )
 
-        # Save to MongoDB
-        record = {
-            'zipcode': int(zipcode),
-            'sqft_living': float(sqft_living),
-            'price': float(predicted_price),
-            'avg_income': float(avg_income)  # Ensure it's a float
+        # Append new record to dataframe (optional for future use)
+        new_record = {
+            'zipcode': zipcode,
+            'sqft_living': sqft_living,
+            'predicted_price': predicted_price,
+            'avg_income': avg_income,
+            'bedrooms': bedrooms,
+            'bathrooms': bathrooms
         }
-        collection.insert_one(record)
+        global df
+        df = pd.concat([df, pd.DataFrame([new_record])], ignore_index=True)
 
         return render_template('Main.html', prediction=f"${predicted_price:,.2f}", recommendation=recommendation)
 
@@ -65,28 +79,17 @@ def predict():
         print(f"Error: {e}")
         return render_template('Main.html', prediction="Model error. Please try again later.")
 
-
 # Route to provide real-time data
 @app.route('/data')
 def data():
     try:
-        # Pull the latest 20 records from MongoDB
-        records = collection.find().sort('_id', -1).limit(20)
-        data = [
-            {
-                'zipcode': int(record.get('zipcode')) if record.get('zipcode') else None,
-                'sqft_living': float(record.get('sqft_living')) if record.get('sqft_living') else None,
-                'price': float(record.get('price')) if record.get('price') else None,
-                'avg_income': float(record.get('avg_income')) if record.get('avg_income') else None, # Added avg_income
-                'crime_rate_per_capita': float(record.get('crime_rate_per_capita')) if record.get('crime_rate_per_capita') else None
-            }
-            for record in records
-        ]
+        # Get the latest 20 records from JSON data
+        latest_records = df.sort_index(ascending=False).head(20)
+        data = latest_records.to_dict(orient='records')
         return jsonify(data)
     except Exception as e:
         print(f"Error fetching data: {e}")
         return jsonify({'error': f"Failed to load data: {str(e)}"})
-
 
 if __name__ == '__main__':
     app.run(debug=True)

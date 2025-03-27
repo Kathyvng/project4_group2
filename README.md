@@ -4,8 +4,6 @@ Real Estate Pricing Forecasting
 
 ## Overview of the Analysis
 
-The real estate market is complex and influenced by a variety of factors such as location, property size, crime rates, and income levels. Homebuyers face difficulties in identifying affordable properties that meet their criteria and understanding market trends. This project aims to solve this problem by developing a predictive model that helps users find suitable real estate options based on budget and property preferences.
-
 The real estate market is complex and influenced by a variety of factors such as location, property size, crime rates, and income levels. Homebuyers often face challenges in identifying affordable properties that meet their criteria and in understanding market trends. This project aims to address these issues by developing a predictive model that helps users find suitable real estate options based on their budget and property preferences.
 
 ## Data Sources:

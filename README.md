@@ -22,18 +22,22 @@ Throughout the development of this project, we prioritized ethical consideration
 
 ## Folders/Files Breakdown
 
-Results is stored in folder Final_Deliverables.
-- housing.py: Flask Python server used as the backend for the UI application.
-- util.py: Contains core routines for handling routing requests and responses in the Flask Python server.
+The results are stored in the folder Final_Deliverables, with the following folder/file structure:
+
 - artifacts:
     + columns.json: Columns used for the Flask Python server.
     + optimized_predict_pricing.pickle: Final pickle model file used by the Flask Python server.
+- model_building:
+    + housing_ml_models_1.ipynb: Build models, test models, and test predictions.
+    + housing_price_cleaning.ipynb: Jupyter notebook to clean data and engineer features.
+- Output: Group presentation file, visualization files (charts/heatmaps), and Tableau dashboard.
+- Resources: Four CSV datasets and one cleaned data file (housing_merge.csv) used for model building and the visualization dashboard (Tableau).
 - static:
     + app.css: Stylesheet for the UI application.
     + app.js: Contains dynamic code for making HTML calls to the backend to retrieve data.
     + app.html: Contains the structure of the UI elements.
-- Resources: Four CSV datasets and one cleaned data file (housing_merge.csv) used for model building and the visualization dashboard (Tableau).
-- Output: Group presentation file, visualization files (charts/heatmaps), and Tableau dashboard.
+- housing.py: Flask Python server used as the backend for the UI application.
+- util.py: Contains core routines for handling routing requests and responses in the Flask Python server.
 
 ## Methodology
 

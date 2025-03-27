@@ -5,12 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(
-    app,
-    resources={r"/*": {"origins": "http://127.0.0.1:5501"}},
-)
-
-app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5501"}})
 
 
 # Define a route for the root URL ("/")
@@ -70,7 +65,7 @@ def get_estimated_price():
     bedroom = float(data["bedrooms"])
     bathroom = float(data["bathrooms"])
     sqft_living = float(data["sqft_living"])  # Corrected typo here
-    avg_income = float(data["avg_income"])
+    avg_income = int(data["avg_income"])
     city = data["city"]
     zipcode = data["zipcode"]
 

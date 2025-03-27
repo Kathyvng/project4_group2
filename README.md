@@ -31,7 +31,7 @@ Results is stored in folder Final_Deliverables.
 - static:
     + app.css: Stylesheet for the UI application.
     + app.js: Contains dynamic code for making HTML calls to the backend to retrieve data.
-- templates/app.html: Contains the structure of the UI elements.
+    + app.html: Contains the structure of the UI elements.
 - Resources: Four CSV datasets and one cleaned data file (housing_merge.csv) used for model building and the visualization dashboard (Tableau).
 - Output: Group presentation file, visualization files (charts/heatmaps), and Tableau dashboard.
 

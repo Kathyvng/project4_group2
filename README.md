@@ -35,6 +35,7 @@ The results are stored in the folder Final_Deliverables, with the following fold
 - static:
     + app.css: Stylesheet for the UI application.
     + app.js: Contains dynamic code for making HTML calls to the backend to retrieve data.
+- templates:
     + app.html: Contains the structure of the UI elements.
 - housing.py: Flask Python server used as the backend for the UI application.
 - util.py: Contains core routines for handling routing requests and responses in the Flask Python server.
